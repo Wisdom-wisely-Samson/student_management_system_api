@@ -2,10 +2,10 @@ from fastapi import FastAPI  # type: ignore[import]
 from app.database import Base, engine
 from app.models.student import Student
 from app.routers.student_router import router as student_router
-
+from app.config import APP_NAME
 Base.metadata.create_all(bind= engine)
 app = FastAPI(
-    title="Student Management API",
+    title=APP_NAME,
     version="1.1.0"
 )
 

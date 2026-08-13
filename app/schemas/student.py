@@ -5,6 +5,11 @@ class StudentCreate(BaseModel):
     age: int = Field(gt=0, lt=100)
     course: str = Field(min_length=3)
 
+class StudentUpdate(BaseModel):
+    name: str | None = Field(default=None, min_length=3)
+    age: int | None = Field(default=None, gt=0, lt=100)
+    course: str | None = Field(default=None, min_length=3)
+
 class StudentResponse(BaseModel):
     id: int
     name: str
@@ -12,7 +17,7 @@ class StudentResponse(BaseModel):
     course: str
 
 model_config = {
-"from atributes": True
+    "from_attributes": True
 }
 
     
