@@ -6,6 +6,7 @@ from sqlalchemy import pool
 from alembic import context
 from app.database import Base
 from app.models.student import Student
+from app.models.users import User
 from app.config import DATABASE_URL
 from dotenv import load_dotenv
 

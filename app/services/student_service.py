@@ -14,7 +14,8 @@ def create_student(db: Session, student: StudentCreate):
         db_student = Student(
                 name = student.name,
                 age = student.age,
-                course = student.course
+                course = student.course,
+                email = student.email
             )
         db.add(db_student)
         db.commit()
@@ -95,7 +96,7 @@ def delete_student(db: Session, student_id: int):
             "Delete Failed"
         )
 
-def search_students(db: Session, name: str | None = None, course: str | None = None):
+def search_students(db: Session, name: str | None = None, course: str | None = None, email: str | None = None):
     query = db.query(Student)
 
     if name:
@@ -105,6 +106,9 @@ def search_students(db: Session, name: str | None = None, course: str | None = N
     if course:
         query = query.filter(Student.course.ilike(f"%{course}%"))
         logger.info(f"Course(s) Found")
+
+    if email:
+        query.filter(Student.email.ilike(f"%{email}%"))
     
     results = query.all()
 
