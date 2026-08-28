@@ -3,6 +3,7 @@ from fastapi.responses import JSONResponse
 from app.database import Base, engine
 from app.models.student import Student
 from app.routers.student_router import router as student_router
+from app.routers.auth_router import router as user_router
 from app.config import APP_NAME
 from app.loggin_config import setup_logging
 from app.exeptions import StudentNotFoundException
@@ -34,4 +35,5 @@ def home():
         "message": "Welcome to the School Management System API!"
     }
 app.include_router(student_router)
+app.include_router(user_router)
 
