@@ -12,11 +12,12 @@ from app.services.student_service import (
     update_student,
     delete_student
 )
+from app.auth_dependency import get_current_user
 
 router = APIRouter(prefix="/students",tags=["Students"])
 
 @router.get("/", response_model=list[StudentResponse])
-def read_students(skip: int = Query(default = 0, ge=1, description = "Number of students to skip"), limit: int = Query(default = 10, ge = 1, le = 100, description = "Maximum number of students to return"),db: Session = Depends(get_db)):
+def read_students(skip: int = Query(default = 0, ge=1, description = "Number of students to skip"), limit: int = Query(default = 10, ge = 1, le = 100, description = "Maximum number of students to return"),db: Session = Depends(get_db), current_user: str = Depends(get_current_user)):
     return get_students(db, skip=skip, limit=limit)
 
 @router.post("/", response_model= StudentResponse)
