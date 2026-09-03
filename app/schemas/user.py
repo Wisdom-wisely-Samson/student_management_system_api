@@ -4,6 +4,7 @@ class UserCreate(BaseModel):
     username: str
     email: EmailStr
     password: str = Field(min_length=8, max_length=72)
+    role: str = "student"
 
 class UserLogin(BaseModel):
     username: str
@@ -14,6 +15,7 @@ class UserResponse(BaseModel):
     username: str
     email: EmailStr
     is_active: bool
+    role: str
 
 
     model_config = {

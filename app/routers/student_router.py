@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
+from app.models.users import User
 
 from app.database import get_db
 from app.schemas.student import StudentCreate, StudentUpdate, StudentResponse
@@ -13,15 +14,27 @@ from app.services.student_service import (
     delete_student
 )
 from app.auth_dependency import get_current_user
+from app.auth_dependency import require_role
 
 router = APIRouter(prefix="/students",tags=["Students"])
 
 @router.get("/", response_model=list[StudentResponse])
-def read_students(skip: int = Query(default = 0, ge=1, description = "Number of students to skip"), limit: int = Query(default = 10, ge = 1, le = 100, description = "Maximum number of students to return"),db: Session = Depends(get_db), current_user: str = Depends(get_current_user)):
+def read_students(skip: int = Query(default = 0, ge=1, 
+    description = "Number of students to skip"),
+    limit: int = Query(default = 10, ge = 1, le = 100,
+    description = "Maximum number of students to return"),
+    db: Session = Depends(get_db), 
+    current_user: User = Depends(get_current_user)
+):
+    print(current_user.username)
+    print(current_user.role)
     return get_students(db, skip=skip, limit=limit)
 
 @router.post("/", response_model= StudentResponse)
-def add_student(student: StudentCreate, db: Session = Depends(get_db)):
+def add_student(student: StudentCreate,
+    db: Session = Depends(get_db), 
+    current_user: User = Depends(require_role("admin", "teacher"))
+):
     return create_student(db, student)
 @router.get("/search", response_model=list[StudentResponse])
 def search_student(name: str | None = Query(default = None, min_length=1), course: str | None = Query(default = None, min_length= 1), db: Session = Depends(get_db)):
