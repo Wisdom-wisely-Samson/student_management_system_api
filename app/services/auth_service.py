@@ -1,4 +1,4 @@
-from app.security import hash_password, verify_password, create_acccess_token
+from app.security import hash_password, verify_password, create_access_token
 from sqlalchemy.orm import Session
 from app.models.users import User
 
@@ -36,6 +36,6 @@ def login_user(db: Session, username: str, password: str):
     if not user:
         return None
 
-    acccess_token = create_acccess_token(data={"sub": str(user.id)})
+    access_token = create_access_token(data={"sub": str(user.id)})
 
-    return acccess_token
+    return access_token

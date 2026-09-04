@@ -24,11 +24,10 @@ def read_students(skip: int = Query(default = 0, ge=1,
     limit: int = Query(default = 10, ge = 1, le = 100,
     description = "Maximum number of students to return"),
     db: Session = Depends(get_db), 
-    current_user: User = Depends(get_current_user)
-):
-    print(current_user.username)
-    print(current_user.role)
+    current_user: User = Depends(require_role("admin", "teacher")
+)):
     return get_students(db, skip=skip, limit=limit)
+
 
 @router.post("/", response_model= StudentResponse)
 def add_student(student: StudentCreate,
