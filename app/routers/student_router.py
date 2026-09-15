@@ -36,25 +36,28 @@ def add_student(student: StudentCreate,
 ):
     return create_student(db, student)
 @router.get("/search", response_model=list[StudentResponse])
-def search_student(name: str | None = Query(default = None, min_length=1), course: str | None = Query(default = None, min_length= 1), db: Session = Depends(get_db)):
+def search_student(name: str | None = Query(default = None, min_length=1), 
+                   course: str | None = Query(default = None, min_length= 1),
+                     db: Session = Depends(get_db), current_student: User = Depends(require_role("admin", "teacher"))):
     return search_students(db, name=name, course=course)
-
+# @router.get("/me")
+# def get_my_profile()
 @router.get("/{student_id}", response_model=StudentResponse)
-def read_student(student_id: int, db: Session = Depends(get_db)):
+def read_student(student_id: int, db: Session = Depends(get_db), current_user: User = Depends(require_role("admin", "teacher"))):
     student = get_student_by_id(db, student_id)
 
     if student is  None:
         raise HTTPException(status_code=404, detail="Student not found!")
     return student
 @router.put("/{student_id}", response_model=StudentResponse)
-def edit_student(student_id: int, student: StudentUpdate, db: Session = Depends(get_db)):
+def edit_student(student_id: int, student: StudentUpdate, db: Session = Depends(get_db), current_user: User = Depends(require_role("admin", "teacher")) ):
     updated_student = update_student(db, student_id, student)
 
     if updated_student is None:
         raise HTTPException(status_code=404, detail="Student not found!")
     return updated_student
 @router.delete("/{student_id}")
-def remove_student(student_id: int, db: Session= Depends(get_db)):
+def remove_student(student_id: int, db: Session= Depends(get_db), current_user: User = Depends(require_role("admin"))):
     student = delete_student(db, student_id)
 
     if student is None:
