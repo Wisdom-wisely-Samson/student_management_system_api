@@ -5,8 +5,9 @@ from app.models.users import User
 from app.auth_dependency import get_current_user
 
 from app.database import get_db
-from app.schemas.user import UserCreate, UserResponse, UserLogin, TokenResponse, StudentRegister, StudentAccountResponse
+from app.schemas.user import UserCreate, UserResponse, UserLogin, TokenResponse, StudentRegister, StudentAccountResponse, ChangePassword
 from app.services.auth_service import create_user, login_user, create_student_account
+from app.security import change_user_password
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
@@ -44,4 +45,26 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
 
     return{
         "access_token": access_token, "token_type": "bearer"
+    }
+
+@router.put("/change-password")
+def change_password(
+    password_data: ChangePassword,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db), 
+
+):
+    success = change_user_password(
+        db,
+        current_user,
+        password_data.current_password,
+        password_data.new_password
+    )
+    if not success:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Current password is incorrect"
+        )
+    return{
+        "message": "Password changed successfully!"
     }
