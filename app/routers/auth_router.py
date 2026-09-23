@@ -2,12 +2,11 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from fastapi.security import OAuth2PasswordRequestForm
 from app.models.users import User
-from app.auth_dependency import get_current_user
+from app.auth_dependency import get_current_user, require_role
 
 from app.database import get_db
 from app.schemas.user import UserCreate, UserResponse, UserLogin, TokenResponse, StudentRegister, StudentAccountResponse, ChangePassword
-from app.services.auth_service import create_user, login_user, create_student_account
-from app.security import change_user_password
+from app.services.auth_service import create_user, login_user, create_student_account, change_user_password
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
@@ -67,4 +66,38 @@ def change_password(
         )
     return{
         "message": "Password changed successfully!"
+    }
+@router.put("/{user_id}/deactivate")
+def deactivate_user(user_id: int, db: Session = Depends(get_db), current_user: User = Depends(require_role("admin"))):
+    user = db.query(User).filter(User.id == user_id).first()
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+    user.is_active = False
+
+    db.commit()
+    db.refresh(user)
+
+    return{
+        "message": "User deactivated successfully"
+    }
+@router.put("/{user_id}/activate")
+def activate_user(user_id: int, db: Session = Depends(get_db), current_user: User = Depends(require_role("admin"))):
+    user = db.query(User).filter(User.id == user_id).first()
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+    user.is_active = True
+
+    db.commit()
+    db. refresh(user)
+
+    return{
+        "message": "User account activated successfully"
     }
