@@ -12,7 +12,7 @@ def create_user(db: Session, user_data):
         username = user_data.username,
         email = user_data.email,
         hashed_password = hashed_password,
-        role =user_data.role
+        role = "student"
         )
     db.add(new_user)
     db.commit()

@@ -1,10 +1,14 @@
 from pydantic import BaseModel, EmailStr, Field
 from app.schemas.student import StudentResponse
+from typing import Literal
 class UserCreate(BaseModel):
     username: str
     email: EmailStr
     password: str = Field(min_length=8, max_length=72)
-    role: str = "student"
+
+    model_config = {
+        "extra": "forbid"
+    }
 
 class StudentRegister(BaseModel):
     username: str
@@ -46,4 +50,4 @@ class ChangePassword(BaseModel):
     new_password: str = Field(min_length=8, max_length=72)
 
 class RoleUpdate(BaseModel):
-    role: str
+    role: Literal["student", "teacher", "admin"]
