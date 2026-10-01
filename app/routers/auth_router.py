@@ -17,7 +17,14 @@ def get_users(db: Session = Depends(get_db), current_user: User = Depends(requir
 
 @router.post("/", response_model=UserResponse)
 def register_user(user: UserCreate, db: Session = Depends(get_db)):
-    return create_user(db, user)
+    try:
+        return create_user(db, user)
+
+    except ValueError as error:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(error)
+        )
 
 @router.post("/register/student", response_model=StudentAccountResponse)
 def register_student(student_data: StudentRegister, db: Session = Depends(get_db)):

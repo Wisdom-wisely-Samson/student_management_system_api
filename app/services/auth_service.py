@@ -2,10 +2,17 @@ from app.security import hash_password, verify_password, create_access_token
 from sqlalchemy.orm import Session
 from app.models.users import User
 from app.models.student import Student
+from sqlalchemy.exc import IntegrityError
 
 
 
 def create_user(db: Session, user_data):
+    existing_username = db.query(User).filter(User.username == user_data.username).first()
+    if existing_username:
+        raise ValueError("Username already exists")
+    existing_email = db.query(User).filter(User.email == user_data.email).first()
+    if existing_email:
+        raise ValueError("Email already exists")
     hashed_password = hash_password(user_data.password)
     
     new_user = User(
@@ -15,7 +22,11 @@ def create_user(db: Session, user_data):
         role = "student"
         )
     db.add(new_user)
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise ValueError("Username or Password already exists!")
     db.refresh(new_user)
     return new_user
 
