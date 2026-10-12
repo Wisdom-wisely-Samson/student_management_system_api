@@ -3,10 +3,12 @@ from sqlalchemy.orm import Session
 from fastapi.security import OAuth2PasswordRequestForm
 from app.models.users import User
 from app.auth_dependency import get_current_user, require_role
+from app.exeptions import NotFoundException
 
 from app.database import get_db
 from app.schemas.user import UserCreate, UserResponse, UserLogin, TokenResponse, StudentRegister, StudentAccountResponse, ChangePassword, RoleUpdate
 from app.services.auth_service import create_user, login_user, create_student_account, change_user_password
+
 
 router = APIRouter(prefix="/users", tags=["Users"])
 @router.get("/", response_model=list[UserResponse])
@@ -17,14 +19,10 @@ def get_users(db: Session = Depends(get_db), current_user: User = Depends(requir
 
 @router.post("/", response_model=UserResponse)
 def register_user(user: UserCreate, db: Session = Depends(get_db)):
-    try:
-        return create_user(db, user)
 
-    except ValueError as error:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(error)
-        )
+    return create_user(db, user)
+
+    
 
 @router.post("/register/student", response_model=StudentAccountResponse)
 def register_student(student_data: StudentRegister, db: Session = Depends(get_db)):
@@ -83,9 +81,8 @@ def change_password(
 def get_user_by_id(user_id: int, db: Session = Depends(get_db), current_user: User = Depends(require_role("admin"))):
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found"
+        raise NotFoundException(
+            "User not found"
         )
     return user
 @router.put("/{user_id}/deactivate")
@@ -110,9 +107,8 @@ def activate_user(user_id: int, db: Session = Depends(get_db), current_user: Use
     user = db.query(User).filter(User.id == user_id).first()
 
     if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found"
+        raise NotFoundException(
+            "User not found"
         )
     user.is_active = True
 
