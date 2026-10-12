@@ -1,3 +1,4 @@
+import logging
 from app.security import hash_password, verify_password, create_access_token
 from sqlalchemy.orm import Session
 from app.models.users import User
@@ -5,15 +6,17 @@ from app.models.student import Student
 from sqlalchemy.exc import IntegrityError
 from app.exeptions import AppException, ConflictException
 
-
+logger = logging.getLogger(__name__)
 
 def create_user(db: Session, user_data):
     existing_username = db.query(User).filter(User.username == user_data.username).first()
     if existing_username:
         raise ConflictException("Username already exists")
+    logger.warning("Registration failed: username already exists")
     existing_email = db.query(User).filter(User.email == user_data.email).first()
     if existing_email:
         raise ConflictException("Email already exists")
+    logger.warning("Registration failed: email already exists")
     hashed_password = hash_password(user_data.password)
     
     new_user = User(
@@ -29,6 +32,7 @@ def create_user(db: Session, user_data):
         db.rollback()
         raise ConflictException("Username or Password already exists!")
     db.refresh(new_user)
+    logger.info("User registered successfully: user_id=%s", new_user.id)
     return new_user
 
 def create_student_account(db: Session, student_data):
